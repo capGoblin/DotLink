@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { WalletIcon, LinkIcon } from "lucide-react";
 import { useWallet } from "@/hooks/useWallet";
 import { cn } from "@/lib/utils";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -60,14 +61,17 @@ export default function Navbar() {
             </Button>
           </div>
         ) : (
-          <Button
-            size="lg"
-            className="rounded-full blob-button bg-primary text-primary-foreground text-lg px-8 py-6"
-            onClick={connect}
-          >
-            <WalletIcon className="mr-3 h-6 w-6" />
-            Connect Wallet
-          </Button>
+          <>
+            <ConnectButton />
+            {/* <Button
+              size="lg"
+              className="rounded-full blob-button bg-primary text-primary-foreground text-lg px-8 py-6"
+              onClick={connect}
+            >
+              <WalletIcon className="mr-3 h-6 w-6" />
+              Connect Wallet
+            </Button> */}
+          </>
         )}
       </div>
     </nav>
