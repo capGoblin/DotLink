@@ -2,7 +2,7 @@ export interface Link {
   id: string;
   amount: number;
   expiresAt: Date;
-  status: 'active' | 'expired';
+  status: "active" | "claimed";
 }
 
 export interface LinkData {

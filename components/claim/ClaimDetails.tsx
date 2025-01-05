@@ -1,5 +1,5 @@
-import { formatDistance } from 'date-fns';
-import { LinkData } from '@/types/link';
+import { formatDistance } from "date-fns";
+import { LinkData } from "@/types/link";
 
 interface ClaimDetailsProps {
   linkData: LinkData;
@@ -14,11 +14,11 @@ export function ClaimDetails({ linkData }: ClaimDetailsProps) {
           {linkData.senderAddress}
         </p>
       </div>
-      
+
       <div className="space-y-2">
         <p className="text-sm text-muted-foreground">Amount</p>
         <p className="text-3xl font-bold text-foreground">
-          {linkData.amount} DOT
+          {linkData.amount} WST
         </p>
       </div>
 

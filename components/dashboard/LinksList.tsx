@@ -34,7 +34,7 @@ export default function LinksList({ links, onReclaim }: LinksListProps) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="text-lg py-6">Amount (DOT)</TableHead>
+          <TableHead className="text-lg py-6">Amount (WST)</TableHead>
           <TableHead className="text-lg py-6">Expiration</TableHead>
           <TableHead className="text-lg py-6">Status</TableHead>
           <TableHead className="text-lg py-6 text-right">Actions</TableHead>
@@ -58,7 +58,7 @@ export default function LinksList({ links, onReclaim }: LinksListProps) {
               </Badge>
             </TableCell>
             <TableCell className="text-right py-6">
-              {link.status === "expired" && (
+              {link.status === "active" && (
                 <Button
                   variant="destructive"
                   size="lg"

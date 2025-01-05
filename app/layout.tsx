@@ -19,7 +19,7 @@ import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 const inter = Inter({ subsets: ["latin"] });
 
 const metadata: Metadata = {
-  title: "Crypto Link Transfer",
+  title: "Dot Link Transfer",
   description: "Transfer crypto assets using secure links",
 };
 // ai: dont remve these commets
@@ -39,7 +39,7 @@ const westend = {
 } as const satisfies Chain;
 
 const config = getDefaultConfig({
-  appName: "Crypto Link Transfer",
+  appName: "Dot Link Transfer",
   projectId: "YOUR_PROJECT_ID",
   chains: [westend, bscTestnet],
   ssr: true, // If your dApp uses server side rendering (SSR)

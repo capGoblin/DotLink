@@ -28,7 +28,7 @@ interface CreateLinkFormProps {
   onClose: () => void;
 }
 
-const CONTRACT_ADDRESS = "0x3346390A8643C85226F6ecb1F5300aED67c32c88";
+const CONTRACT_ADDRESS = "0xbef368894A05B7F1E0e64a78eE530222e0e63471";
 
 export default function CreateLinkForm({
   onCreateLink,
@@ -67,7 +67,6 @@ export default function CreateLinkForm({
           senderLinks.length > 0
         ) {
           const linkId = senderLinks[senderLinks.length - 1] as `0x${string}`;
-          console.log("linkId", linkId);
 
           onCreateLink({
             amount: Number(amount),
@@ -118,7 +117,7 @@ export default function CreateLinkForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       <div className="space-y-3">
-        <label className="text-lg font-medium">Amount (DOT)</label>
+        <label className="text-lg font-medium">Amount (WST)</label>
         <Input
           type="number"
           value={amount}

@@ -15,7 +15,7 @@ import {
 import { abi } from "@/lib/abi";
 import { useSearchParams } from "next/navigation";
 
-const CONTRACT_ADDRESS = "0x3346390A8643C85226F6ecb1F5300aED67c32c88";
+const CONTRACT_ADDRESS = "0xbef368894A05B7F1E0e64a78eE530222e0e63471";
 
 export default function ClaimPage() {
   const { address, connect } = useWallet();
@@ -136,16 +136,12 @@ export default function ClaimPage() {
         <Card className="border border-border bg-card">
           <CardHeader className="p-8">
             <CardTitle className="text-4xl font-bold text-center">
-              Claim Your DOT
+              Claim Your WST
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-8 p-8">
             {showAnimation ? (
-              <ClaimAnimation
-                onAnimationComplete={handleAnimationComplete}
-                isProcessing={isPending || isConfirming}
-                isComplete={isSuccess && isConfirmed}
-              />
+              <ClaimAnimation onAnimationComplete={handleAnimationComplete} />
             ) : (
               <>
                 <div className="space-y-6">
@@ -161,7 +157,7 @@ export default function ClaimPage() {
                   <div className="space-y-3">
                     <p className="text-lg text-muted-foreground">Amount</p>
                     <p className="text-5xl font-bold text-foreground">
-                      {Number(amount) / 1e18} DOT
+                      {Number(amount) / 1e18} WST
                     </p>
                   </div>
 

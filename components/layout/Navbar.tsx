@@ -24,7 +24,7 @@ export default function Navbar() {
           <Link href="/" className="flex items-center gap-3">
             <LinkIcon className="h-8 w-8 text-primary" />
             <span className="font-black text-2xl text-foreground">
-              CryptoLink
+              Dot Link
             </span>
           </Link>
 
