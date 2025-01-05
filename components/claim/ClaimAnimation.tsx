@@ -1,28 +1,29 @@
 "use client";
 
 import { CheckCircle2, Wallet, ArrowDownToLine } from "lucide-react";
-import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 interface ClaimAnimationProps {
   onAnimationComplete: () => void;
+  isProcessing: boolean;
+  isComplete: boolean;
 }
 
-export function ClaimAnimation({ onAnimationComplete }: ClaimAnimationProps) {
-  const [stage, setStage] = useState<"claiming" | "processing" | "complete">(
-    "claiming"
-  );
+export function ClaimAnimation({
+  onAnimationComplete,
+  isProcessing,
+  isComplete,
+}: ClaimAnimationProps) {
+  let stage: "claiming" | "processing" | "complete" = "claiming";
 
-  // Trigger the animation sequence
-  useEffect(() => {
-    setTimeout(() => {
-      setStage("processing");
-      setTimeout(() => {
-        setStage("complete");
-        setTimeout(onAnimationComplete, 1000);
-      }, 1000);
-    }, 1000);
-  }, [onAnimationComplete]);
+  if (isProcessing) {
+    stage = "processing";
+  }
+  if (isComplete) {
+    stage = "complete";
+    // Call onAnimationComplete after a delay when complete
+    setTimeout(onAnimationComplete, 1000);
+  }
 
   return (
     <div className="flex flex-col items-center justify-center py-8 space-y-4">

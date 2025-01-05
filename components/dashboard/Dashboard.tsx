@@ -9,11 +9,15 @@ import { mockLinks } from "@/lib/mock-data";
 export default function Dashboard() {
   const [links, setLinks] = useState<Link[]>(mockLinks);
 
-  const handleCreateLink = (data: { amount: number; expiration: number }) => {
+  const handleCreateLink = (data: {
+    amount: number;
+    expiration: number;
+    linkId: string;
+  }) => {
     const newLink: Link = {
-      id: `link_${Date.now()}`,
+      id: data.linkId,
       amount: data.amount,
-      expiresAt: new Date(Date.now() + data.expiration * 24 * 60 * 60 * 1000),
+      expiresAt: new Date(Date.now() + data.expiration * 1000),
       status: "active",
     };
     setLinks([newLink, ...links]);

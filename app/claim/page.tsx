@@ -7,28 +7,128 @@ import { useWallet } from "@/hooks/useWallet";
 import { useState } from "react";
 import { formatDistance } from "date-fns";
 import { ClaimAnimation } from "@/components/claim/ClaimAnimation";
+import {
+  useReadContract,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+} from "wagmi";
+import { abi } from "@/lib/abi";
+import { useSearchParams } from "next/navigation";
+
+const CONTRACT_ADDRESS = "0x3346390A8643C85226F6ecb1F5300aED67c32c88";
 
 export default function ClaimPage() {
   const { address, connect } = useWallet();
   const [isLoading, setIsLoading] = useState(false);
   const [showAnimation, setShowAnimation] = useState(false);
+  const searchParams = useSearchParams();
+  const linkId = searchParams.get("linkId");
 
-  // Mock data
-  const linkData = {
-    senderAddress: "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
-    amount: 50.5,
-    expiresAt: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000),
-  };
+  const { data: linkData } = useReadContract({
+    address: CONTRACT_ADDRESS as `0x${string}`,
+    abi,
+    functionName: "links",
+    args: linkId ? [linkId as `0x${string}`] : undefined,
+    query: {
+      enabled: !!linkId,
+    },
+  });
+
+  const {
+    data: hash,
+    isPending,
+    writeContract,
+    isSuccess,
+  } = useWriteContract();
+
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash,
+    });
 
   const handleClaim = async () => {
-    setIsLoading(true);
-    setShowAnimation(true);
+    if (!linkId) return;
+
+    try {
+      setIsLoading(true);
+      setShowAnimation(true);
+      await writeContract({
+        address: CONTRACT_ADDRESS as `0x${string}`,
+        abi,
+        functionName: "claimLink",
+        args: [linkId as `0x${string}`],
+      });
+    } catch (error) {
+      console.error("Error claiming tokens:", error);
+      setIsLoading(false);
+      setShowAnimation(false);
+    }
   };
 
   const handleAnimationComplete = () => {
-    setShowAnimation(false);
+    // setShowAnimation(false);
     setIsLoading(false);
   };
+
+  if (!linkId) {
+    return (
+      <Card className="border border-border bg-card">
+        <CardHeader className="p-8">
+          <CardTitle className="text-4xl font-bold text-center">
+            Invalid Link
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-8">
+          <p className="text-center text-muted-foreground">
+            Please make sure you have the correct claim link.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!linkData) {
+    return (
+      <Card className="border border-border bg-card">
+        <CardHeader className="p-8">
+          <CardTitle className="text-4xl font-bold text-center">
+            Link Not Found
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-8">
+          <p className="text-center text-muted-foreground">
+            This link may have expired or been claimed already.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const [sender, amount, expirationTime, claimed] = linkData as [
+    `0x${string}`,
+    bigint,
+    bigint,
+    boolean
+  ];
+
+  console.log(linkData);
+
+  if (claimed) {
+    return (
+      <Card className="border border-border bg-card">
+        <CardHeader className="p-8">
+          <CardTitle className="text-4xl font-bold text-center">
+            Link Already Claimed
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-8">
+          <p className="text-center text-muted-foreground">
+            This link has already been claimed.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <main className="container mx-auto px-8 py-16">
@@ -41,7 +141,11 @@ export default function ClaimPage() {
           </CardHeader>
           <CardContent className="space-y-8 p-8">
             {showAnimation ? (
-              <ClaimAnimation onAnimationComplete={handleAnimationComplete} />
+              <ClaimAnimation
+                onAnimationComplete={handleAnimationComplete}
+                isProcessing={isPending || isConfirming}
+                isComplete={isSuccess && isConfirmed}
+              />
             ) : (
               <>
                 <div className="space-y-6">
@@ -50,25 +154,27 @@ export default function ClaimPage() {
                       From Address
                     </p>
                     <div className="font-mono bg-secondary/20 p-4 rounded-lg overflow-hidden">
-                      <p className="text-base break-all">
-                        {linkData.senderAddress}
-                      </p>
+                      <p className="text-base break-all">{sender}</p>
                     </div>
                   </div>
 
                   <div className="space-y-3">
                     <p className="text-lg text-muted-foreground">Amount</p>
                     <p className="text-5xl font-bold text-foreground">
-                      {linkData.amount} DOT
+                      {Number(amount) / 1e18} DOT
                     </p>
                   </div>
 
                   <div className="space-y-3">
                     <p className="text-lg text-muted-foreground">Expires</p>
                     <p className="text-xl text-foreground">
-                      {formatDistance(linkData.expiresAt, new Date(), {
-                        addSuffix: true,
-                      })}
+                      {formatDistance(
+                        new Date(Number(expirationTime) * 1000),
+                        new Date(),
+                        {
+                          addSuffix: true,
+                        }
+                      )}
                     </p>
                   </div>
                 </div>
@@ -85,9 +191,9 @@ export default function ClaimPage() {
                   <Button
                     className="w-full rounded-full blob-button text-xl py-8"
                     onClick={handleClaim}
-                    disabled={isLoading}
+                    disabled={isLoading || isConfirming}
                   >
-                    {isLoading ? "Claiming..." : "Claim Tokens"}
+                    {isLoading || isConfirming ? "Claiming..." : "Claim Tokens"}
                   </Button>
                 )}
               </>

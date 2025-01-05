@@ -13,7 +13,11 @@ import CreateLinkForm from "./CreateLinkForm";
 import { useState } from "react";
 
 interface CreateLinkModalProps {
-  onCreateLink: (data: { amount: number; expiration: number }) => void;
+  onCreateLink: (data: {
+    amount: number;
+    expiration: number;
+    linkId: string;
+  }) => void;
 }
 
 export default function CreateLinkModal({

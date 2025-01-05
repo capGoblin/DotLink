@@ -6,7 +6,6 @@ import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import NavbarWrapper from "@/components/layout/NavbarWrapper";
-import { Providers } from "@/components/provider";
 import "@rainbow-me/rainbowkit/styles.css";
 import {
   getDefaultConfig,
@@ -14,17 +13,7 @@ import {
   darkTheme,
 } from "@rainbow-me/rainbowkit";
 import { WagmiProvider } from "wagmi";
-import {
-  mainnet,
-  polygon,
-  optimism,
-  arbitrum,
-  base,
-  sepolia,
-  taiko,
-  taikoHekla,
-  Chain,
-} from "wagmi/chains";
+import { bscTestnet, Chain } from "wagmi/chains";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -33,7 +22,10 @@ const metadata: Metadata = {
   title: "Crypto Link Transfer",
   description: "Transfer crypto assets using secure links",
 };
-
+// ai: dont remve these commets
+// 0x9872D472140B82d1B2Bda31704Bb8Ae25FF4CEB7 wnd
+// 0x9A52b845e486dea20a3c5C7Cc9a6148ebD95615e bnb
+// mew 0x3346390A8643C85226F6ecb1F5300aED67c32c88
 const westend = {
   id: 420420421,
   name: "Westend",
@@ -49,7 +41,7 @@ const westend = {
 const config = getDefaultConfig({
   appName: "Crypto Link Transfer",
   projectId: "YOUR_PROJECT_ID",
-  chains: [westend],
+  chains: [westend, bscTestnet],
   ssr: true, // If your dApp uses server side rendering (SSR)
 });
 

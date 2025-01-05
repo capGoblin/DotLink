@@ -1,6 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import {
+  useWaitForTransactionReceipt,
+  useWriteContract,
+  useReadContract,
+  useAccount,
+} from "wagmi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,11 +17,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CreateLinkAnimation } from "./CreateLinkAnimation";
+import { abi } from "@/lib/abi";
 
 interface CreateLinkFormProps {
-  onCreateLink: (data: { amount: number; expiration: number }) => void;
+  onCreateLink: (data: {
+    amount: number;
+    expiration: number;
+    linkId: string;
+  }) => void;
   onClose: () => void;
 }
+
+const CONTRACT_ADDRESS = "0x3346390A8643C85226F6ecb1F5300aED67c32c88";
 
 export default function CreateLinkForm({
   onCreateLink,
@@ -25,17 +38,68 @@ export default function CreateLinkForm({
   const [expiration, setExpiration] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [generatedLink, setGeneratedLink] = useState("");
+  const { address } = useAccount();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onCreateLink({
-      amount: Number(amount),
-      expiration: Number(expiration),
+  const { data: hash, isPending, writeContract } = useWriteContract();
+
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash,
     });
-    setIsCreating(true);
-    setGeneratedLink(
-      `https://cryptolink.io/claim/${Math.random().toString(36).slice(2)}`
-    );
+
+  const { data: senderLinks, refetch: refetchLinks } = useReadContract({
+    address: CONTRACT_ADDRESS as `0x${string}`,
+    abi,
+    functionName: "getSenderLinks",
+    args: [address as `0x${string}`],
+    query: {
+      enabled: !!address,
+    },
+  });
+
+  useEffect(() => {
+    const checkLinks = async () => {
+      if (!isPending && hash) {
+        await refetchLinks();
+        if (
+          senderLinks &&
+          Array.isArray(senderLinks) &&
+          senderLinks.length > 0
+        ) {
+          const linkId = senderLinks[senderLinks.length - 1] as `0x${string}`;
+          console.log("linkId", linkId);
+
+          onCreateLink({
+            amount: Number(amount),
+            expiration: Number(expiration) * 24 * 60 * 60,
+            linkId: linkId,
+          });
+
+          setIsCreating(true);
+          setGeneratedLink(`${window.location.origin}/claim?linkId=${linkId}`);
+        }
+      }
+    };
+
+    checkLinks();
+  }, [isPending, hash]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const expirationInSeconds =
+      Math.floor(Date.now() / 1000) + Number(expiration) * 24 * 60 * 60;
+
+    try {
+      await writeContract({
+        address: CONTRACT_ADDRESS as `0x${string}`,
+        abi,
+        functionName: "createLink",
+        args: [BigInt(expirationInSeconds)],
+        value: BigInt(Number(amount) * 1e18),
+      });
+    } catch (error) {
+      console.error("Error creating link:", error);
+    }
   };
 
   const handleAnimationComplete = () => {
@@ -57,8 +121,6 @@ export default function CreateLinkForm({
         <label className="text-lg font-medium">Amount (DOT)</label>
         <Input
           type="number"
-          step="0.1"
-          min="0"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           placeholder="Enter amount"
@@ -90,9 +152,18 @@ export default function CreateLinkForm({
         type="submit"
         size="lg"
         className="w-full rounded-xl text-lg py-6 mt-6"
+        disabled={isPending || isConfirming}
       >
-        Create Link
+        {isPending || isConfirming ? "Creating..." : "Create Link"}
       </Button>
+
+      {hash && !isPending && (
+        <div className="mt-4 p-4 bg-muted rounded-lg">
+          <p className="text-sm text-muted-foreground break-all">
+            Transaction Hash: {hash}
+          </p>
+        </div>
+      )}
     </form>
   );
 }
