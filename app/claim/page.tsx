@@ -141,7 +141,11 @@ export default function ClaimPage() {
           </CardHeader>
           <CardContent className="space-y-8 p-8">
             {showAnimation ? (
-              <ClaimAnimation onAnimationComplete={handleAnimationComplete} />
+              <ClaimAnimation
+                isProcessing={isLoading || isConfirming}
+                isComplete={isConfirmed}
+                onAnimationComplete={handleAnimationComplete}
+              />
             ) : (
               <>
                 <div className="space-y-6">
